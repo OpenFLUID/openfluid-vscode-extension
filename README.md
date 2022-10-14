@@ -19,15 +19,15 @@ _TO BE WRITTEN_
 ## Requirements
 
 This extension requires the OpenFLUID command line tool to be installed locally. 
-If the OpenFLUID installation is not accessible byg the default, the installation prefix path can be set in the extension preferences. 
+If the OpenFLUID installation is not accessible by default, the installation prefix path can be set in the extension settings. 
 
 
 ## Settings
 
 ### Installation path
 
-A custom Path to the OpenFLUID installation can be set in Settings UI 
-or using the `openfluid.paths.installPrefix` key in the settings file. Leave it blank to used default standard installation.
+A custom prefix path to the OpenFLUID installation can be set in Settings UI 
+or using the `openfluid.paths.installPrefix` key in the settings file. Leave it blank to use the default standard installation.
 
 ```json
 "openfluid.paths.installPrefix": "/path/to/custom/install"
