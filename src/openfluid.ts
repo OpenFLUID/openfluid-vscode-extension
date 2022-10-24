@@ -81,7 +81,7 @@ export function getVersion() : string {
 /**
   Creates a ware source tree of the given type 
   @param typeStr The type of ware, must be 'simulator', 'observer' or 'builderext'
- */
+*/
 export async function createWare(typeStr : string) : Promise<void> {
     const wksPath = await selectWorkspacePath();
 
@@ -116,3 +116,43 @@ export async function createWare(typeStr : string) : Promise<void> {
         }
     }
 }
+
+
+/**
+  Creates a project
+*/
+export async function createProject() : Promise<void> {
+    const wksPath = await selectWorkspacePath();
+
+    if (wksPath !== false) {
+        if (wksPath !== undefined) {
+            const wksName = path.basename(<string>wksPath);
+            vscode.window.showInputBox({ prompt: `Enter the name of the project to create in ${wksName}`})
+            .then(name => {
+                if (name !== undefined) {
+                    if (name.trim().length > 0) {
+                        const parentPath = `${wksPath}/projects`;
+                        if (!existsSync(`${parentPath}/${name}`)) {
+                            try {
+                                const cmd = `openfluid create-data --type=project --name=${name} --parent-path=${parentPath} --with-sample-data`;
+                                runOpenFLUIDCommand(cmd);
+                            } catch (e) {
+                                vscode.window.showErrorMessage(`Error during creation of project ${name}`);
+                            }
+                        }
+                        else {
+                            vscode.window.showErrorMessage(`Unable to create project : ${name} already exists`);
+                        }
+                    }
+                    else {
+                        vscode.window.showErrorMessage(`Unable to create project : invalid name`);
+                    }
+                }
+            });
+        }
+        else {
+            vscode.window.showErrorMessage(`Unable to create project : no workspace or folder open`);
+        }
+    }
+}
+

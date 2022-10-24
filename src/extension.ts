@@ -4,7 +4,6 @@ import * as openfluid from './openfluid';
 
 
 export function activate(context: vscode.ExtensionContext) {
-    
 
     context.subscriptions.push(vscode.commands.registerCommand('openfluid.getVersion', () => {
         const version = openfluid.getVersion();
@@ -28,6 +27,12 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('openfluid.createBuilderext', () => {
         openfluid.createWare("builderext");
     }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('openfluid.createProject', () => {
+        openfluid.createProject();
+    }));
+
 }
+
 
 export function deactivate() {}
