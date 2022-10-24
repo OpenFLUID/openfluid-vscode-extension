@@ -32,6 +32,10 @@ export function activate(context: vscode.ExtensionContext) {
         openfluid.createProject();
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand('openfluid.runProject', () => {
+        openfluid.runProject();
+    }));
+
 }
 
 

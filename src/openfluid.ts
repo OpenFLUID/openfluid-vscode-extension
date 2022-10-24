@@ -4,15 +4,13 @@ import * as process from 'child_process';
 import { existsSync } from 'fs';
 import { env } from 'process';
 import * as path from 'path';
-import { sep } from 'path';
 
 
 /**
-  Executes a command using the correct OpenFLUID environment 
-  @param cmd The command to execute
-  @returns The standard output of the executed command
+  Returns a process environment, adapted with OpenFLUID path if defined in extension settings
+  @return the process environment
 */
-function runOpenFLUIDCommand(cmd : string): Buffer {
+function getOpenFLUIDEnv(): any {
     const config = vscode.workspace.getConfiguration('openfluid');
     var installPrefix : string | undefined = config.get('paths.installPrefix');
     var cEnv = env;
@@ -24,7 +22,48 @@ function runOpenFLUIDCommand(cmd : string): Buffer {
       cEnv.PATH += `:${installPrefix}/bin`;
     }
 
+    return cEnv;
+}
+
+
+/**
+  Executes a command using the adapted OpenFLUID environment
+  @param cmd The command to execute
+  @returns The standard output of the executed command
+*/
+function runOpenFLUIDCommand(cmd : string): Buffer {
+    var cEnv = getOpenFLUIDEnv();
+
     return process.execSync(cmd,{ env : cEnv });
+}
+
+
+/**
+  Executes a command in the OpenFLUID dedicated terminal using the adapted OpenFLUID environment
+  @param cmd The command to execute in the terminal
+  @param workPath The workpath in which the terminal is located (undefined by default)
+*/
+
+function runInOpenFLUIDTerminal(cmd : string, workPath : string | undefined = undefined): void {
+     var terminal : vscode.Terminal | undefined = undefined;
+
+    // close the OpenFLUID terminal if already open
+    const terms = <vscode.Terminal[]>(<any>vscode.window).terminals;
+    terminal = terms.find(items => items.name === "OpenFLUID"); 
+    if (terminal !== undefined) {
+        terminal.dispose();
+    }
+ 
+    const options : vscode.TerminalOptions = {
+      name : "OpenFLUID",
+      cwd : workPath,
+      env: getOpenFLUIDEnv()
+    };
+
+    terminal = vscode.window.createTerminal(options);
+    terminal.show(true);  // set focus to the OpenFLUID terminal
+
+    terminal.sendText(`${cmd}`);
 }
 
 
@@ -66,6 +105,27 @@ async function selectWorkspacePath(tryUseCurrent: boolean = false): Promise<stri
 
 
 /**
+  Tries to detect the project path corresponding to the current active text editor
+  @returns The project path if detected
+*/
+function detectProjectPath(): string | undefined {
+    var detPath : string | undefined = undefined;
+
+    if (vscode.window.activeTextEditor !== undefined) {
+        var docPath = vscode.window.activeTextEditor.document.uri.path;
+        var wksPath = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri)?.uri.path;
+
+        const matchesPrj = docPath.match(`(${wksPath}/projects/[a-zA-Z0-9\s]+).*`);
+        if (matchesPrj) {
+            detPath = matchesPrj[1];
+        }
+    }
+
+    return detPath;
+}
+
+
+/**
   Gets the version of the available OpenFLUID software
   @return The version string 
 */
@@ -100,18 +160,15 @@ export async function createWare(typeStr : string) : Promise<void> {
                             } catch (e) {
                                 vscode.window.showErrorMessage(`Error during creation of ${typeStr} ${id}`);
                             }
-                        }
-                        else {
+                        } else {
                             vscode.window.showErrorMessage(`Unable to create ${typeStr} : ${id} already exists`);
                         }
-                    }
-                    else {
+                    } else {
                         vscode.window.showErrorMessage(`Unable to create ${typeStr} : invalid ID`);
                     }
                 }
             });
-        }
-        else {
+        } else {
             vscode.window.showErrorMessage(`Unable to create ${typeStr} : no workspace or folder open`);
         }
     }
@@ -139,20 +196,32 @@ export async function createProject() : Promise<void> {
                             } catch (e) {
                                 vscode.window.showErrorMessage(`Error during creation of project ${name}`);
                             }
-                        }
-                        else {
+                        } else {
                             vscode.window.showErrorMessage(`Unable to create project : ${name} already exists`);
                         }
-                    }
-                    else {
+                    } else {
                         vscode.window.showErrorMessage(`Unable to create project : invalid name`);
                     }
                 }
             });
-        }
-        else {
+        } else {
             vscode.window.showErrorMessage(`Unable to create project : no workspace or folder open`);
         }
     }
 }
+
+
+/**
+  Runs a project
+*/
+export function runProject() : void {
+    var prjPath = detectProjectPath();
+
+    if (prjPath !== undefined) {
+        runInOpenFLUIDTerminal(`openfluid run ${prjPath}`,prjPath);
+    } else {
+      vscode.window.showErrorMessage(`Unable to detect the project to run`);
+    }
+}
+
 
