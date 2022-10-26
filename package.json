@@ -1,8 +1,8 @@
 {
   "name": "openfluid",
   "displayName": "OpenFLUID",
-  "description": "OpenFLUID extension for VS Code",
-  "version": "0.5.0",
+  "description": "OpenFLUID extension for Visual Studio Code",
+  "version": "0.5.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/OpenFLUID/openfluid-vscode-extension"
@@ -12,12 +12,22 @@
     "email" : "jean-christophe.fabre@inrae.fr"
   },
   "publisher": "INRAE",
-  "engines": {
-    "vscode": "^1.60.0"
-  },
+  "keywords": [
+    "OpenFLUID",
+    "modelling",
+    "simulation",
+    "scientific",
+    "spatial",
+    "landscapes"
+  ],
   "categories": [
     "Other"
   ],
+  "license": "MIT",
+  "icon": "ressources/openfluid_icon_512.png",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
   "activationEvents": [
     "onStartupFinished"
   ],
