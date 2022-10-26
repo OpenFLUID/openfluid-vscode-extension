@@ -28,6 +28,14 @@ export function activate(context: vscode.ExtensionContext) {
         openfluid.createWare("builderext");
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand('openfluid.configureWare', () => {
+        openfluid.configureWare();
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('openfluid.buildWare', () => {
+        openfluid.buildWare();
+    }));
+
     context.subscriptions.push(vscode.commands.registerCommand('openfluid.createProject', () => {
         openfluid.createProject();
     }));

@@ -43,7 +43,6 @@ function runOpenFLUIDCommand(cmd : string): Buffer {
   @param cmd The command to execute in the terminal
   @param workPath The workpath in which the terminal is located (undefined by default)
 */
-
 function runInOpenFLUIDTerminal(cmd : string, workPath : string | undefined = undefined): void {
      var terminal : vscode.Terminal | undefined = undefined;
 
@@ -101,6 +100,27 @@ async function selectWorkspacePath(tryUseCurrent: boolean = false): Promise<stri
     }
   }
   return wksPath;
+}
+
+
+/**
+  Tries to detect the ware sources path corresponding to the current active text editor
+  @returns The ware sources path if detected
+*/
+function detectWareSrcPath(): string | undefined {
+    var detPath : string | undefined = undefined;
+
+    if (vscode.window.activeTextEditor !== undefined) {
+        var docPath = vscode.window.activeTextEditor.document.uri.path;
+        var wksPath = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri)?.uri.path;
+
+        const matchesPrj = docPath.match(`(${wksPath}/wares-dev/(simulators|observers|builderexts)/[a-zA-Z0-9\s\.]+).*`);
+        if (matchesPrj) {
+            detPath = matchesPrj[1];
+        }
+    }
+
+    return detPath;
 }
 
 
@@ -176,6 +196,34 @@ export async function createWare(typeStr : string) : Promise<void> {
 
 
 /**
+  Configures a ware, using the active editor to identify the ware
+*/
+export function configureWare() : void {
+    var srcPath = detectWareSrcPath();
+
+    if (srcPath !== undefined) {
+        runInOpenFLUIDTerminal(`openfluid configure --path=${srcPath}`,srcPath);
+    } else {
+      vscode.window.showErrorMessage(`Unable to detect the ware to configure`);
+    }
+}
+
+
+/**
+  Builds a ware, using the active editor to identify the ware
+*/
+export function buildWare() : void {
+    var srcPath = detectWareSrcPath();
+
+    if (srcPath !== undefined) {
+        runInOpenFLUIDTerminal(`openfluid build --path=${srcPath}`,srcPath);
+    } else {
+      vscode.window.showErrorMessage(`Unable to detect the ware to build`);
+    }
+}
+
+
+/**
   Creates a project
 */
 export async function createProject() : Promise<void> {
@@ -212,7 +260,7 @@ export async function createProject() : Promise<void> {
 
 
 /**
-  Runs a project
+  Runs a project, using the active editor to identify the project
 */
 export function runProject() : void {
     var prjPath = detectProjectPath();
