@@ -88,20 +88,17 @@
       {
         "command": "openfluid.configureWare",
         "key": "ctrl+K ctrl+C",
-        "mac": "cmd+K cmd+C",
-        "when": "editorTextFocus"
+        "mac": "cmd+K cmd+C"
       },
       {
         "command": "openfluid.buildWare",
         "key": "ctrl+K ctrl+B",
-        "mac": "cmd+K cmd+B",
-        "when": "editorTextFocus"
+        "mac": "cmd+K cmd+B"
       },
       {
         "command": "openfluid.runProject",
         "key": "ctrl+K ctrl+R",
-        "mac": "cmd+K cmd+R",
-        "when": "editorTextFocus"
+        "mac": "cmd+K cmd+R"
       }
     ]
   },
