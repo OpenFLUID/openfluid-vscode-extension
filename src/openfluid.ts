@@ -6,18 +6,28 @@ import { env } from 'process';
 import * as path from 'path';
 
 
+function getOpenFLUIDInstallPrefix(): string | undefined {
+    const config = vscode.workspace.getConfiguration('openfluid');
+    var installPrefix : string | undefined = config.get('paths.installPrefix');
+
+    if (installPrefix !== undefined && installPrefix.length > 0) {
+        return installPrefix.trim();
+    }
+
+    return undefined;
+}
+
+
 /**
   Returns a process environment, adapted with OpenFLUID path if defined in extension settings
   @return the process environment
 */
 function getOpenFLUIDEnv(): any {
     const config = vscode.workspace.getConfiguration('openfluid');
-    var installPrefix : string | undefined = config.get('paths.installPrefix');
+    var installPrefix : string | undefined = getOpenFLUIDInstallPrefix();
     var cEnv = env;
     
-    if (installPrefix !== undefined && installPrefix.length > 0) {
-      installPrefix = installPrefix.trim();
-
+    if (installPrefix !== undefined) {
       cEnv.OPENFLUID_INSTALL_PREFIX=installPrefix;
       cEnv.PATH += `:${installPrefix}/bin`;
     }
@@ -201,8 +211,15 @@ export async function createWare(typeStr : string) : Promise<void> {
 export function configureWare() : void {
     var srcPath = detectWareSrcPath();
 
+    var command : string = `openfluid configure --src-path=${srcPath}`;
+    
+    var installPrefix = getOpenFLUIDInstallPrefix();
+    if (installPrefix !== undefined) {
+        command += ` --- -DCMAKE_PREFIX_PATH=${installPrefix}/lib`;
+    }
+
     if (srcPath !== undefined) {
-        runInOpenFLUIDTerminal(`openfluid configure --path=${srcPath}`,srcPath);
+        runInOpenFLUIDTerminal(command,srcPath);
     } else {
       vscode.window.showErrorMessage(`Unable to detect the ware to configure`);
     }
@@ -216,7 +233,7 @@ export function buildWare() : void {
     var srcPath = detectWareSrcPath();
 
     if (srcPath !== undefined) {
-        runInOpenFLUIDTerminal(`openfluid build --path=${srcPath}`,srcPath);
+        runInOpenFLUIDTerminal(`openfluid build --src-path=${srcPath} --with-install`,srcPath);
     } else {
       vscode.window.showErrorMessage(`Unable to detect the ware to build`);
     }
